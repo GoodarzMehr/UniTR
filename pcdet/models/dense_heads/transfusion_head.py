@@ -192,6 +192,8 @@ class TransFusionHead(nn.Module):
         elif self.dataset_name == "Waymo":
             local_max[ :, 1, ] = F.max_pool2d(heatmap[:, 1], kernel_size=1, stride=1, padding=0)
             local_max[ :, 2, ] = F.max_pool2d(heatmap[:, 2], kernel_size=1, stride=1, padding=0)
+        elif self.dataset_name == "SimBEV":
+            local_max[ :, 0, ] = F.max_pool2d(heatmap[:, 0], kernel_size=1, stride=1, padding=0)
         heatmap = heatmap * (heatmap == local_max)
         x_grid, y_grid = heatmap.shape[-2:]
         heatmap = heatmap.view(batch_size, heatmap.shape[1], -1)
@@ -621,6 +623,11 @@ class TransFusionHead(nn.Module):
                 ),
                 dict(num_class=1, class_names=["Cyclist"], indices=[2], radius=0.7),
             ]
+        elif self.dataset_name == "SimBEV":
+            self.tasks = [
+                    dict(num_class=5, class_names=[], indices=[1, 2, 3, 4, 5], radius=-1),
+                    dict(num_class=1, class_names=["Pedestrian"], indices=[0], radius=0.4),
+                ]
         for i in range(batch_size):
             boxes3d = ret_dict[i]["pred_boxes"]
             scores = ret_dict[i]["pred_scores"]
