@@ -410,6 +410,8 @@ class DataProcessor(object):
             # Calculate transformation matrix.
             lidar2point = data_dict['lidar_aug_matrix'].copy()
 
+            lidar2point[:2, 3] = lidar2point[:2, 3][::-1]
+
             point2lidar = np.linalg.inv(lidar2point)
 
             lidar2ego = data_dict['metadata']['lidar2ego']
