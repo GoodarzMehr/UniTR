@@ -7,7 +7,7 @@ DATA_CONFIG:
     
     INFO_PATH: {
       'train': [infos/simbev_infos_train.json],
-      'test': [infos/simbev_infos_test.json],
+      'test': [infos/simbev_infos_val.json],
     }
 
     LOAD_INTERVAL: 10
