@@ -40,6 +40,15 @@ def train_one_epoch(model, optimizer, train_loader, model_func, lr_scheduler, ac
         stop_line_loss_disp = common_utils.AverageMeter()
         carpark_loss_disp = common_utils.AverageMeter()
         divider_loss_disp = common_utils.AverageMeter()
+        # for SimBEV map segmentation
+        road_loss_disp = common_utils.AverageMeter()
+        car_loss_disp = common_utils.AverageMeter()
+        truck_loss_disp = common_utils.AverageMeter()
+        bus_loss_disp = common_utils.AverageMeter()
+        motorcycle_loss_disp = common_utils.AverageMeter()
+        bicycle_loss_disp = common_utils.AverageMeter()
+        rider_loss_disp = common_utils.AverageMeter()
+        pedestrian_loss_disp = common_utils.AverageMeter()
 
     end = time.time()
     for cur_it in range(start_it, total_it_each_epoch):
@@ -124,6 +133,23 @@ def train_one_epoch(model, optimizer, train_loader, model_func, lr_scheduler, ac
                 disp_dict.update({'loss_carpark_area': f'{carpark_loss_disp.avg:.4f}'})
                 divider_loss_disp.update(tb_dict['loss_divider'])
                 disp_dict.update({'loss_divider': f'{divider_loss_disp.avg:.4f}'})
+            if 'loss_road' in list(tb_dict.keys()):
+                road_loss_disp.update(tb_dict['loss_road'])
+                disp_dict.update({'loss_road': f'{road_loss_disp.avg:.4f}'})
+                car_loss_disp.update(tb_dict['loss_car'])
+                disp_dict.update({'loss_car': f'{car_loss_disp.avg:.4f}'})
+                truck_loss_disp.update(tb_dict['loss_truck'])
+                disp_dict.update({'loss_truck': f'{truck_loss_disp.avg:.4f}'})
+                bus_loss_disp.update(tb_dict['loss_bus'])
+                disp_dict.update({'loss_bus': f'{bus_loss_disp.avg:.4f}'})
+                motorcycle_loss_disp.update(tb_dict['loss_motorcycle'])
+                disp_dict.update({'loss_motorcycle': f'{motorcycle_loss_disp.avg:.4f}'})
+                bicycle_loss_disp.update(tb_dict['loss_bicycle'])
+                disp_dict.update({'loss_bicycle': f'{bicycle_loss_disp.avg:.4f}'})
+                rider_loss_disp.update(tb_dict['loss_rider'])
+                disp_dict.update({'loss_rider': f'{rider_loss_disp.avg:.4f}'})
+                pedestrian_loss_disp.update(tb_dict['loss_pedestrian'])
+                disp_dict.update({'loss_pedestrian': f'{pedestrian_loss_disp.avg:.4f}'})
             disp_dict.update({
                 'lr': cur_lr, 'd_time': f'{data_time.val:.2f}({data_time.avg:.2f})',
                 'f_time': f'{forward_time.val:.2f}({forward_time.avg:.2f})', 'b_time': f'{batch_time.val:.2f}({batch_time.avg:.2f})'
