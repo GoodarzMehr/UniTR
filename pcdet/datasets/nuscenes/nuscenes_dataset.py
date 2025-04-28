@@ -257,10 +257,10 @@ class NuScenesDataset(DatasetTemplate):
                 input_dict.update({
                     'gt_boxes2d': info['gt_boxes_2d'] if mask is None else info['gt_boxes_2d'][mask]
                 })
-
+        
         if self.use_camera:
             input_dict = self.load_camera_info(input_dict, info)
-
+        
         data_dict = self.prepare_data(data_dict=input_dict)
 
         if self.dataset_cfg.get('SET_NAN_VELOCITY_TO_ZEROS', False) and 'gt_boxes' in info:
@@ -270,7 +270,7 @@ class NuScenesDataset(DatasetTemplate):
 
         if not self.dataset_cfg.PRED_VELOCITY and 'gt_boxes' in data_dict:
             data_dict['gt_boxes'] = data_dict['gt_boxes'][:, [0, 1, 2, 3, 4, 5, 6, -1]]
-
+            
         return data_dict
 
     def evaluation(self, det_annos, class_names, **kwargs):
@@ -525,19 +525,19 @@ if __name__ == '__main__':
 
     if args.func == 'create_nuscenes_infos':
         dataset_cfg = EasyDict(yaml.safe_load(open(args.cfg_file)))
-        ROOT_DIR = (Path(__file__).resolve().parent / '../../../').resolve()
+        ROOT_DIR = (Path(__file__).resolve().parent / '../../../../../').resolve()
         dataset_cfg.VERSION = args.version
         create_nuscenes_info(
             version=dataset_cfg.VERSION,
-            data_path=ROOT_DIR / 'data' / 'nuscenes',
-            save_path=ROOT_DIR / 'data' / 'nuscenes',
+            data_path=ROOT_DIR / 'dataset' / 'nuscenes',
+            save_path=ROOT_DIR / 'dataset' / 'nuscenes',
             max_sweeps=dataset_cfg.MAX_SWEEPS,
             with_cam=args.with_cam
         )
 
         nuscenes_dataset = NuScenesDataset(
             dataset_cfg=dataset_cfg, class_names=None,
-            root_path=ROOT_DIR / 'data' / 'nuscenes',
+            root_path=ROOT_DIR / 'dataset' / 'nuscenes',
             logger=common_utils.create_logger(), training=True
         )
         nuscenes_dataset.create_groundtruth_database(

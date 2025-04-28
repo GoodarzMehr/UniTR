@@ -1,5 +1,5 @@
 DATASET: 'SimBEVDataset'
-DATA_PATH: '../data/simbev'
+DATA_PATH: '/dataset/simbev'
 
 MAX_SWEEPS: 9
 PRED_VELOCITY: True
