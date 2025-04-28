@@ -1,3 +1,6 @@
+	
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/simbev-a-synthetic-multi-task-multi-sensor/3d-object-detection-on-simbev)](https://paperswithcode.com/sota/3d-object-detection-on-simbev?p=simbev-a-synthetic-multi-task-multi-sensor)
+
 # UniTR in CARLA
 
 ## About
