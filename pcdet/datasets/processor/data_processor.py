@@ -7,6 +7,8 @@ import torchvision
 from ...utils import box_utils, common_utils
 from PIL import Image
 
+import torch.nn.functional as F
+
 tv = None
 try:
     import cumm.tensorview as tv
@@ -357,6 +359,126 @@ class DataProcessor(object):
 
         data_dict["gt_masks_bev"] = labels
         data_dict.pop('location')
+
+        return data_dict
+    
+    def load_simbev_bev_segmentation(self, data_dict=None, config=None):
+        '''
+        Load SimBEV BEV segmentation masks.
+
+        Args:
+            data_dict: dictionary of data.
+            config: configuration settings.
+        
+        Returns:
+            data_dict: dictionary of data.
+        '''
+        if data_dict is None:
+            return partial(self.load_simbev_bev_segmentation, config=config)
+        
+        is_train = data_dict['metadata']['is_train']
+        
+        if config.get('bev_res_y', None) is None:
+            config.bev_res_y = config.bev_res_x
+        
+        if config.get('bev_dim_y', None) is None:
+            config.bev_dim_y = config.bev_dim_x
+        
+        xRes = config.bev_res_x
+        yRes = config.bev_res_y
+
+        DxDim = config.bev_dim_x
+        DyDim = config.bev_dim_y
+
+        dType = torch.float32
+        
+        # Load BEV ground truth.
+        gt_seg_path = data_dict['metadata']['gt_seg_path']
+
+        if gt_seg_path.endswith('.npz'):
+            gt_masks = np.load(gt_seg_path)['data']
+        else:
+            gt_masks = np.load(gt_seg_path)
+        
+        gt_masks = np.rot90(gt_masks, 1, axes=(2, 1)).copy()
+
+        gt_masks = gt_masks[:, ::-1, :].copy()
+
+        if is_train:
+            gt_masks = torch.from_numpy(gt_masks).to(dType)
+            
+            # Calculate transformation matrix.
+            lidar2point = data_dict['lidar_aug_matrix'].copy()
+
+            lidar2point[:2, 3] = lidar2point[:2, 3][::-1]
+
+            point2lidar = np.linalg.inv(lidar2point)
+
+            lidar2ego = data_dict['metadata']['lidar2ego']
+
+            point2ego = lidar2ego @ point2lidar
+
+            R = torch.tensor(point2ego[[0, 1, 3], :][:, [0, 1, 3]], dtype=dType)
+
+            xDim = gt_masks.shape[-2]
+            yDim = gt_masks.shape[-1]
+
+            xLim = xDim * xRes / 2
+            yLim = yDim * yRes / 2
+
+            R[:2, 2] /= torch.Tensor([xLim, yLim]).to(dType)
+
+            R[:2, 2] = R[:2, 2].flip(dims=(0,))
+
+            angle = torch.atan2(R[1, 0], R[0, 0])
+
+            R[:2, 2] = torch.Tensor(
+                [[torch.cos(angle), -torch.sin(angle) * (xLim / yLim)],
+                [torch.sin(angle) * (yLim / xLim), torch.cos(angle)]]
+            ).to(dType) @ R[:2, 2]
+
+            R[:2, :2] *= torch.Tensor([[1, (xLim / yLim)], [(yLim / xLim), 1]]).to(dType)
+
+            theta = torch.unsqueeze(R[:2, :], 0)
+
+            unsqueezed_gt_masks = torch.unsqueeze(gt_masks, 0)
+
+            grid = F.affine_grid(theta, unsqueezed_gt_masks.size(), align_corners=False)
+
+            new_gt_mask_nearest = F.grid_sample(
+                unsqueezed_gt_masks,
+                grid,
+                mode='nearest',
+                align_corners=False
+            ).squeeze(0).to(torch.bool)
+            
+            new_gt_mask_bilinear = F.grid_sample(
+                unsqueezed_gt_masks,
+                grid,
+                mode='bilinear',
+                align_corners=False
+            ).squeeze(0)
+
+            new_gt_mask = new_gt_mask_nearest.detach().clone().cpu().numpy()
+            new_gt_mask[4:] = np.logical_or(
+                new_gt_mask[4:],
+                new_gt_mask_bilinear[4:].detach().clone().cpu().numpy() > 0.25
+            )
+
+            data_dict['gt_masks_bev'] = new_gt_mask[
+                :,
+                ((xDim - DxDim) // 2):((xDim + DxDim) // 2),
+                ((yDim - DyDim) // 2):((yDim + DyDim) // 2)
+            ]
+        else:
+            xDim = gt_masks.shape[-2]
+            yDim = gt_masks.shape[-1]
+
+            data_dict['gt_masks_bev'] = gt_masks[
+                :,
+                ((xDim - DxDim) // 2):((xDim + DxDim) // 2),
+                ((yDim - DyDim) // 2):((yDim + DyDim) // 2)
+            ]
 
         return data_dict
     
