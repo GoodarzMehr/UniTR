@@ -113,7 +113,7 @@ bash scripts/dist_test.sh 4 --cfg_file ./cfgs/simbev_models/unitr_map.yaml --ckp
 
 For UniTR+LSS BEV Segmentation, run
 ```bash
-bash scripts/dist_test.sh 4 --cfg_file ./cfgs/simbev_models/unitr_map+lss.yaml --ckpt [checkpoint file]
+bash scripts/dist_test.sh 4 --cfg_file ./cfgs/simbev_models/unitr_map+lss.yaml --ckpt [checkpoint file] --eval_map
 ```
 
 ## Results
