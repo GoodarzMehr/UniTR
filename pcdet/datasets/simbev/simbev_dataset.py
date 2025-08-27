@@ -531,7 +531,7 @@ class SimBEVDataset(DatasetTemplate):
         table_headings = ['Overall IoUs', '0-20m', '20-40m', '>40m']
 
         for i in range(4):
-            print(f'\n{"-"*20} {table_headings[i]} {"-"*20}')
+            print(f'\n{"-" * 40} {table_headings[i]} {"-" * 40}')
             print('\n\n')
 
             print(f'{"IoU":<12} {0.1:<8}{0.2:<8}{0.3:<8}{0.4:<8}{0.5:<8}{0.6:<8}{0.7:<8}{0.8:<8}{0.9:<8}')
