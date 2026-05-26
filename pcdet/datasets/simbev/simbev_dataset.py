@@ -435,7 +435,12 @@ class SimBEVDataset(DatasetTemplate):
     def evaluation(self, results, class_names, eval_metric='iou', **kwargs):
         metrics = {}
         
-        simbev_eval = SimBEVDetectionEval(results, self.class_names, eval_metric)
+        simbev_eval = SimBEVDetectionEval(
+            results,
+            self.class_names,
+            eval_metric,
+            self.dataset_cfg.get('POINT_CLOUD_RANGE', None)
+        )
 
         metrics.update(simbev_eval.evaluate())
 
@@ -673,10 +678,11 @@ class SimBEVDetectionEval:
         classes: list of object classes in the dataset.
         mode: evalution mode, can be 'iou' or 'distance'.
     '''
-    def __init__(self, results, classes, mode='iou'):
+    def __init__(self, results, classes, mode='iou', point_cloud_range=None):
         self.results = results
         self.classes = classes
         self.mode = mode
+        self.point_cloud_range = point_cloud_range
 
         iou_thresholds = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
         distance_thresholds = [0.5, 1.0, 2.0, 4.0]
@@ -732,6 +738,19 @@ class SimBEVDetectionEval:
                 labels_3d = torch.from_numpy(result['pred_labels'] - 1).to(torch.float32)
                 gt_boxes_3d = torch.from_numpy(result['metadata']['gt_boxes']).to(torch.float32)
                 gt_labels_3d = torch.from_numpy(result['metadata']['gt_labels']).to(torch.float32)
+
+                if self.point_cloud_range is not None:
+                    bev_range = np.array(self.point_cloud_range)[[0, 1, 3, 4]] # [x_min, y_min, x_max, y_max]
+                    
+                    in_range = (
+                        (gt_boxes_3d[:, 0] >= bev_range[0]) &
+                        (gt_boxes_3d[:, 1] >= bev_range[1]) &
+                        (gt_boxes_3d[:, 0] <= bev_range[2]) &
+                        (gt_boxes_3d[:, 1] <= bev_range[3])
+                    )
+                    
+                    gt_boxes_3d = gt_boxes_3d[in_range]
+                    gt_labels_3d = gt_labels_3d[in_range]
 
                 if self.mode == 'iou':
                     if boxes_3d.shape[0] > 0:

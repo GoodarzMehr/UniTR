@@ -120,6 +120,38 @@ bash scripts/dist_test.sh 4 --cfg_file ./cfgs/simbev_models/unitr_map+lss.yaml -
 
 ### 3D Object Detection
 
+3D object detection benchmarks were revised after becoming aware of a flaw ([SimBEV#14](https://github.com/GoodarzMehr/SimBEV/issues/14)) in our evaluation method thanks to [@qinlong2133](https://github.com/qinlong2133). The original benchmarks are provided at the end for reference.
+
+#### UniTR
+
+| Class      | AP (%) | ATE (m) | AOE (rad) |   ASE | AVE (m/s) |
+| :--------: | :----: | :-----: | :-------: | :---: | :-------: |
+| Car        |   96.4 |   0.123 |     0.176 | 0.095 |      0.51 |
+| Truck      |   94.5 |   0.122 |     0.134 | 0.073 |      0.57 |
+| Bus        |   96.9 |   0.119 |     0.213 | 0.040 |      0.79 |
+| Motorcycle |   91.0 |   0.094 |     0.150 | 0.105 |      0.62 |
+| Bicycle    |   93.8 |   0.085 |     0.167 | 0.146 |      0.48 |
+| Pedestrian |   95.6 |   0.083 |     0.483 | 0.067 |      0.26 |
+| mean       |   94.7 |   0.104 |     0.220 | 0.088 |      0.54 |
+
+SDS: 85.5% / [Checkpoint](https://drive.google.com/file/d/1Dsx3JYTNwfgIgkH-XF-tOHNpFhTC_AFv)
+
+#### UniTR+LSS
+
+| Class      | AP (%) | ATE (m) | AOE (rad) |   ASE | AVE (m/s) |
+| :--------: | :----: | :-----: | :-------: | :---: | :-------: |
+| Car        |   96.2 |   0.121 |     0.152 | 0.097 |      0.49 |
+| Truck      |   94.4 |   0.126 |     0.140 | 0.078 |      0.56 |
+| Bus        |   97.2 |   0.129 |     0.176 | 0.037 |      0.72 |
+| Motorcycle |   90.6 |   0.091 |     0.148 | 0.096 |      0.61 |
+| Bicycle    |   94.7 |   0.085 |     0.155 | 0.121 |      0.49 |
+| Pedestrian |   95.6 |   0.082 |     0.456 | 0.068 |      0.26 |
+| mean       |   94.8 |   0.106 |     0.204 | 0.083 |      0.52 |
+
+SDS: 86.0% / [Checkpoint](https://drive.google.com/file/d/1-yu5D_VuIGNm5mxnGyf8ubUgP4AQ3TSA)
+
+_Original benchmarks._
+
 #### UniTR
 
 | Class      | AP (%) | ATE (m) | AOE (rad) |   ASE | AVE (m/s) |
